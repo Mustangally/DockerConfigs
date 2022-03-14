@@ -1,0 +1,20 @@
+---
+version: "3"
+
+services:
+  home:
+    image: ghcr.io/linuxserver/heimdall
+    container_name: home
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/denver
+      - APP_Name=Home
+    volumes:
+      - ./data:/config
+    ports:
+      - 8500:80
+      - 8600:443
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
