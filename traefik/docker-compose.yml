@@ -1,0 +1,46 @@
+version: '3'
+
+
+services:
+  traefik:
+    image: traefik:latest
+    container_name: traefik
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - proxy
+    ports:
+      - 80:80
+      - 443:443
+    environment:
+      - CF_API_EMAIL=kevin@kovachweb.com
+      - CF_API_KEY=ff466781e3e8f4b32b082b60439c3377f51d2
+      # be sure to use the correct one depending on if you are using a token or key
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /home/rancher/traefik/data/traefik.yml:/traefik.yml:ro
+      - /home/rancher/traefik/data/acme.json:/acme.json
+      - /home/rancher/traefik/config.yml:/config.yml:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.entrypoints=http"
+      - "traefik.http.routers.traefik.rule=Host(`traefik-dashboard.kkovach.com`)"
+      - "traefik.http.middlewares.traefik-auth.basicauth.users=admin:$$apr1$$Msb/fqd5$$xGZwpAALKETX2L7b2UCGu1"
+      - "traefik.http.middlewares.traefik-https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.sslheader.headers.customrequestheaders.X-Forwarded-Proto=https"
+      - "traefik.http.routers.traefik.middlewares=traefik-https-redirect"
+      - "traefik.http.routers.traefik-secure.entrypoints=https"
+      - "traefik.http.routers.traefik-secure.rule=Host(`traefik-dashboard.kkovach.com`)"
+      - "traefik.http.routers.traefik-secure.middlewares=traefik-auth"
+      - "traefik.http.routers.traefik-secure.tls=true"
+      - "traefik.http.routers.traefik-secure.tls.certresolver=cloudflare"
+      - "traefik.http.routers.traefik-secure.tls.domains[0].main=kkovach.com"
+      - "traefik.http.routers.traefik-secure.tls.domains[0].sans=kkovach.com"
+      - "traefik.http.routers.traefik-secure.service=api@internal"
+#      - 'traefik.http.routers.traefik-secure.middlewares=authelia@docker'
+
+networks:
+  proxy:
+    external: true

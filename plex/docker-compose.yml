@@ -1,0 +1,18 @@
+---
+version: "2.1"
+services:
+  plex:
+    image: lscr.io/linuxserver/plex
+    container_name: plex
+    network_mode: bridge
+    ports:
+      - 32500:32400
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - VERSION=docker
+      - PLEX_CLAIM=
+    volumes:
+      - /home/rancher/plex/config:/config
+      - /mnt/plex:/data
+    restart: unless-stopped

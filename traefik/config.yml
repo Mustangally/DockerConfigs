@@ -1,0 +1,111 @@
+http:
+ #region routers 
+  routers:
+    sonarr:
+      entryPoints:
+        - "https"
+      rule: "Host(`sonarr.kkovach.com`)"
+      middlewares:
+        - authelia
+        - default-headers
+      tls: {}
+      service: sonarr
+    radarr:
+      entryPoints:
+        - "https"
+      rule: "Host(`radarr.kkovach.com`)"
+      middlewares:
+        - authelia
+        - default-headers
+      tls: {}
+      service: radarr
+    photo:
+      entryPoints:
+        - "http"
+      rule: "Host(`photo.kkovach.com`)"
+      middlewares:
+        - default-headers
+      tls: {}
+      service: photo
+#   rancher:
+ #     entryPoints:
+ #       - "https"
+ #     rule: "Host(`rancher.kkovach.com`)"
+ #     middlewares:
+ #       - authelia
+ #       - default-headers
+ #     tls: {}
+ #     service: rancher
+#    proxmox:
+#      entrypoints:
+#        - "https"
+#      rule: "Host(`proxmox.kkovach.com`)"
+#      middlewares:
+#        - authelia
+#        - default-headers
+#      tls: {}
+#      service: proxmox
+
+#endregion
+#region services
+  services:
+    sonarr:
+      loadBalancer:
+        servers:
+          - url: "http://10.0.0.210:8989"
+        passHostHeader: true
+    radarr:
+      loadBalancer:
+        servers:
+          - url: "http://10.0.0.210:7878"
+        passHostHeader: true
+    photo:
+      loadbalancer:
+        servers:
+          - url: "http://10.0.0.207:8085"
+        passHostHeader: true
+#    rancher:
+#      loadBalancer:
+#        servers:
+#          - url: "https://10.0.0.115"
+#        passHostHeader: true
+#    proxmox:
+#      loadBalancer:
+#        servers:
+#          - url: "https://10.0.0.201:8006"
+#        passHostHeader: true
+
+#endregion
+  middlewares:
+    https-redirect:
+      redirectScheme:
+        scheme: https
+    authelia:
+      forwardAuth:
+        address: "http://authelia:9091/api/verify?rd=https://auth.kkovach.com"
+    default-headers:
+      headers:
+        frameDeny: true
+        sslRedirect: true
+        browserXssFilter: true
+        contentTypeNosniff: true
+        forceSTSHeader: true
+        stsIncludeSubdomains: true
+        stsPreload: true
+        stsSeconds: 15552000
+        customFrameOptionsValue: SAMEORIGIN
+        customRequestHeaders:
+          X-Forwarded-Proto: https
+
+    default-whitelist:
+      ipWhiteList:
+        sourceRange:
+        - "10.0.0.0/8"
+        - "192.168.0.0/16"
+        - "172.16.0.0/12"
+
+    secured:
+      chain:
+        middlewares:
+        - default-whitelist
+        - default-headers
