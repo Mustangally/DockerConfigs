@@ -14,8 +14,8 @@ services:
       - 80:80
       - 443:443
     environment:
-      - CF_API_EMAIL=kevin@kovachweb.com
-      - CF_API_KEY=ff466781e3e8f4b32b082b60439c3377f51d2
+      - CF_API_EMAIL=<email>
+      - CF_API_KEY=<key>
       # be sure to use the correct one depending on if you are using a token or key
     volumes:
       - /etc/localtime:/etc/localtime:ro
